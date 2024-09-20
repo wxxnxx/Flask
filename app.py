@@ -4,18 +4,17 @@ import numpy as np
 import os
 import logging
 
-
 app = Flask(__name__)
 
+# 로깅 설정
+logging.basicConfig(level=logging.DEBUG)
 
 # 이미지 처리 함수
 def process_image(image_path):
-    # 이미지 읽기
-    image = cv2.imread(image_path)
-
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"파일이 존재하지 않습니다: {image_path}")
-        # 이미지 읽기
+
+    # 이미지 읽기
     image = cv2.imread(image_path)
     if image is None:
         raise ValueError(f"유효하지 않은 이미지 파일입니다: {image_path}")
@@ -75,34 +74,39 @@ def process_image(image_path):
     cv2.imwrite(result_path, inverted_image)
 
     return result_path
+
 @app.route('/')
 def index():
     return render_template('upload.html')
 
-logging.basicConfig(level=logging.DEBUG)
 @app.route('/upload', methods=['POST'])
-
 def upload_image():
-
     if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+        return jsonify({'error': '파일이 업로드되지 않았습니다.'}), 400
 
     file = request.files['file']
     if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    logging.debug('업로드된 파일: %s', file.filename)
-    # 파일 저장
-    image_path = os.path.join("uploads", file.filename)
-    file.save(image_path)
+        return jsonify({'error': '선택된 파일이 없습니다.'}), 400
 
-    # 이미지 처리
-    result_path = process_image(image_path)
+    # uploads 디렉토리 경로 설정
+    uploads_dir = 'uploads'
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)  # 디렉토리가 없으면 생성
+
+    # 파일 저장 경로
+    image_path = os.path.join(uploads_dir, file.filename)
+    file.save(image_path)
+    logging.debug(f"파일 저장 경로: {image_path}")
+
+    try:
+        # 이미지 처리
+        result_path = process_image(image_path)
+    except Exception as e:
+        logging.error(f"이미지 처리 오류: {e}")
+        return jsonify({'error': str(e)}), 500
 
     # 결과 이미지 반환
     return send_file(result_path, mimetype='image/png')
 
-
 if __name__ == '__main__':
-    if not os.path.exists('uploads'):
-        os.makedirs('uploads')
     app.run(debug=True)
