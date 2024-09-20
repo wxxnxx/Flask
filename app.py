@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 # 이미지 처리 함수
-def process_image(image_path):
+def process_image(image_path, original_filename):
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"파일이 존재하지 않습니다: {image_path}")
 
@@ -70,8 +70,9 @@ def process_image(image_path):
     # 색상 반전
     inverted_image = cv2.bitwise_not(white_background)
 
-    # 결과 이미지 저장 (uploads 디렉토리 내에 저장)
-    result_path = os.path.join('uploads', 'processed_image.png')
+    # 결과 이미지 저장 (원본 파일 이름 사용)
+    base, ext = os.path.splitext(original_filename)
+    result_path = os.path.join('uploads', f'{base}_processed{ext}')
     success = cv2.imwrite(result_path, inverted_image)
 
     if not success:
@@ -107,7 +108,7 @@ def upload_image():
 
     try:
         # 이미지 처리
-        result_path = process_image(image_path)
+        result_path = process_image(image_path, file.filename)
     except Exception as e:
         logging.error(f"이미지 처리 오류: {e}")
         return jsonify({'error': str(e)}), 500
