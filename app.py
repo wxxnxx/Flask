@@ -67,11 +67,11 @@ def process_image(image_path):
     cv2.imwrite(result_path, inverted_image)
 
     return result_path
-
-
-@app.route('/', methods=['POST'])
+@app.route('/')
 def index():
     return render_template('upload.html')
+@app.route('/upload', methods=['POST'])
+
 def upload_image():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
