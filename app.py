@@ -1,16 +1,12 @@
 from flask import Flask, request, jsonify, send_file, render_template
-from flask_cors import CORS
-from flask_restx import Api, Resource
+from flask_cors import CORS  # CORS 추가
 import cv2
 import numpy as np
 import os
 import logging
 
-
-
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # 모든 출처 허용
-#api = Api(app)
+CORS(app)  # CORS 설정
 
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG)
@@ -92,7 +88,6 @@ def process_image(image_path, original_filename):
 def index():
     return render_template('upload.html')
 
-
 @app.route('/upload', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
@@ -103,7 +98,7 @@ def upload_image():
         return jsonify({'error': '선택된 파일이 없습니다.'}), 400
 
     # uploads 디렉토리 경로 설정
-    uploads_dir = os.path.join(app.root_path, 'uploads')
+    uploads_dir = 'uploads'
     if not os.path.exists(uploads_dir):
         os.makedirs(uploads_dir)  # 디렉토리가 없으면 생성
 
