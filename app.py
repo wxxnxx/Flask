@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 import cv2
 import numpy as np
 import os
+
 
 app = Flask(__name__)
 
@@ -69,6 +70,8 @@ def process_image(image_path):
 
 
 @app.route('/upload', methods=['POST'])
+def index():
+    return render_template('upload.html')
 def upload_image():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
