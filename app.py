@@ -72,11 +72,12 @@ def process_image(image_path):
 
     # 결과 이미지 저장 (uploads 디렉토리 내에 저장)
     result_path = os.path.join('uploads', 'processed_image.png')
-    cv2.imwrite(result_path, inverted_image)
+    success = cv2.imwrite(result_path, inverted_image)
 
-    if not os.path.exists(result_path):
+    if not success:
         raise IOError(f"결과 이미지 저장 실패: {result_path}")
 
+    logging.debug(f"결과 이미지 저장 경로: {result_path}")
     return result_path
 
 
