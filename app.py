@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file, render_template
 import cv2
 import numpy as np
 import os
+import logging
 
 
 app = Flask(__name__)
@@ -11,6 +12,13 @@ app = Flask(__name__)
 def process_image(image_path):
     # 이미지 읽기
     image = cv2.imread(image_path)
+
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"파일이 존재하지 않습니다: {image_path}")
+        # 이미지 읽기
+    image = cv2.imread(image_path)
+    if image is None:
+        raise ValueError(f"유효하지 않은 이미지 파일입니다: {image_path}")
 
     # 입력된 이미지 크기에 따른 확대/축소 비율 결정
     max_dimension = max(image.shape[0], image.shape[1])
@@ -70,16 +78,19 @@ def process_image(image_path):
 @app.route('/')
 def index():
     return render_template('upload.html')
+
+logging.basicConfig(level=logging.DEBUG)
 @app.route('/upload', methods=['POST'])
 
 def upload_image():
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
-
+    logging.debug('업로드된 파일: %s', file.filename)
     # 파일 저장
     image_path = os.path.join("uploads", file.filename)
     file.save(image_path)
