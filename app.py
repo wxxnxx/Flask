@@ -9,6 +9,7 @@ app = Flask(__name__)
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG)
 
+
 # 이미지 처리 함수
 def process_image(image_path):
     if not os.path.exists(image_path):
@@ -69,15 +70,20 @@ def process_image(image_path):
     # 색상 반전
     inverted_image = cv2.bitwise_not(white_background)
 
-    # 결과 이미지 저장
-    result_path = "processed_image.png"
+    # 결과 이미지 저장 (uploads 디렉토리 내에 저장)
+    result_path = os.path.join('uploads', 'processed_image.png')
     cv2.imwrite(result_path, inverted_image)
 
+    if not os.path.exists(result_path):
+        raise IOError(f"결과 이미지 저장 실패: {result_path}")
+
     return result_path
+
 
 @app.route('/')
 def index():
     return render_template('upload.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
@@ -107,6 +113,7 @@ def upload_image():
 
     # 결과 이미지 반환
     return send_file(result_path, mimetype='image/png')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
