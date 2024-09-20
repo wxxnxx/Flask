@@ -69,7 +69,7 @@ def process_image(image_path):
     return result_path
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/', methods=['POST'])
 def index():
     return render_template('upload.html')
 def upload_image():
